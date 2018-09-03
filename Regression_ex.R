@@ -1,7 +1,7 @@
 # prepare the R environment
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  dplyr,            # Data munging functions
+  magrittr,            # Data munging functions
   zoo,              # Feature engineering rolling aggregates
   data.table,       # Feature engineering
   ggplot2,          # Graphics
@@ -17,7 +17,7 @@ pacman::p_load(
 
 # set options for plots
 options(repr.plot.width=6, repr.plot.height=6)
-# Load the matches data
+# Load the googs data
 googFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\goog.csv"
 
 if(!file.exists(googFile)){tryCatch(googFile)}
@@ -26,8 +26,16 @@ head(goog_original)
 summary(goog_original)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 head(googTable)
+# eliminate any duplicates that may exist in the dataset
+googs <- goog_original %>%
+  distinct(.keep_all = TRUE, Date, Volume, Adj.Close)
 # generate an id column for future use (joins etc)
 goog_original$goog_id = seq.int(nrow(goog_original))
 head(goog_original)
 summary(goog_original)
+# how many volumes have been realized over the years?
+goog_original %>%
+  ggplot(mapping = aes(year(Date))) +
+  geom_bar(aes(fill= Volume), width=1, color="black") +
+  theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
 
