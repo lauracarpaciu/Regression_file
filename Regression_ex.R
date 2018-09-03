@@ -30,3 +30,4 @@ head(googTable)
 goog_original$goog_id = seq.int(nrow(goog_original))
 head(goog_original)
 summary(goog_original)
+
