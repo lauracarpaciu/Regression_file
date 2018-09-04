@@ -1,7 +1,7 @@
 # prepare the R environment
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  magrittr,            # Data munging functions
+  dplyr,         # Data munging functions
   zoo,              # Feature engineering rolling aggregates
   data.table,       # Feature engineering
   ggplot2,          # Graphics
@@ -26,13 +26,13 @@ head(goog_original)
 summary(goog_original)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 head(googTable)
-# eliminate any duplicates that may exist in the dataset
-googs <- goog_original %>%
-  distinct(.keep_all = TRUE, Date, Volume, Adj.Close)
 # generate an id column for future use (joins etc)
 goog_original$goog_id = seq.int(nrow(goog_original))
 head(goog_original)
 summary(goog_original)
+# eliminate any duplicates that may exist in the dataset
+googs <- goog_original%>%
+  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
 # how many volumes have been realized over the years?
 goog_original %>%
   ggplot(mapping = aes(year(Date))) +
