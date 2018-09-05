@@ -29,11 +29,14 @@ summary(goog_original)
 head(nasdaqFile_original)
 summary(nasdaqFile_original)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
-head(googTable)
+nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 # generate an id column for future use (joins etc)
 goog_original$goog_id = seq.int(nrow(goog_original))
+nasdaqFile_original$nasdaq_id = seq.int(nrow(nasdaqFile_original))
 head(goog_original)
 summary(goog_original)
+head(nasdaqFile_original)
+summary(nasdaqFile_original)
 # eliminate any duplicates that may exist in the dataset
 googs <- goog_original%>%
   distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
