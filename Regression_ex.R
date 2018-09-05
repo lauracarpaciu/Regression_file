@@ -25,11 +25,7 @@ if(file.exists(googFile)) goog_original <- read.csv(googFile)
 if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
 if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
 head(goog_original)
-summary(goog_original)
 head(nasdaqFile_original)
-summary(nasdaqFile_original)
-googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
-nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 # generate an id column for future use (joins etc)
 goog_original$goog_id = seq.int(nrow(goog_original))
 nasdaqFile_original$nasdaq_id = seq.int(nrow(nasdaqFile_original))
@@ -37,12 +33,25 @@ head(goog_original)
 summary(goog_original)
 head(nasdaqFile_original)
 summary(nasdaqFile_original)
-# eliminate any duplicates that may exist in the dataset
-googs <- goog_original%>%
-  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
 # how many volumes have been realized over the years?
-goog_original %>%
+goog_original %>% 
   ggplot(mapping = aes(year(Date))) +
   geom_bar(aes(fill= Volume), width=1, color="black") +
   theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
+nasdaqFile_original %>% 
+  ggplot(mapping = aes(year(Date))) +
+  geom_bar(aes(fill= Volume), width=1, color="black") +
+  theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
+# eliminate any duplicates that may exist in the dataset
+googs <- goog_original%>%
+  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
+nasdaqs <- nasdaqFile_original%>%
+  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
+# the date field is formatted as a string - transform that into R date
+head(googs)
+summary(googs)
+head(nasdaqs)
+summary(nasdaqs)
+googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
+nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 
