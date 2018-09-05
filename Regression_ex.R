@@ -19,11 +19,15 @@ pacman::p_load(
 options(repr.plot.width=6, repr.plot.height=6)
 # Load the googs data
 googFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\goog.csv"
-
+nasdaqFile<-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\Nasdaq.csv"
 if(!file.exists(googFile)){tryCatch(googFile)}
 if(file.exists(googFile)) goog_original <- read.csv(googFile)
+if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
+if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
 head(goog_original)
 summary(goog_original)
+head(nasdaqFile_original)
+summary(nasdaqFile_original)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 head(googTable)
 # generate an id column for future use (joins etc)
