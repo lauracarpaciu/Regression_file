@@ -54,4 +54,6 @@ head(nasdaqs)
 summary(nasdaqs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
-
+googTable <- merge(googTable,nasdaqTable, by="Date")
+googTable[,c("Date")]<- as.character.Date(googTable[,c("Date")])
+googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
