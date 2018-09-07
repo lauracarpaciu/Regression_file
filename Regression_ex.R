@@ -20,10 +20,13 @@ options(repr.plot.width=6, repr.plot.height=6)
 # Load the googs data
 googFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\goog.csv"
 nasdaqFile<-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\Nasdaq.csv"
+tbondsFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\tbond5yr.csv"
 if(!file.exists(googFile)){tryCatch(googFile)}
 if(file.exists(googFile)) goog_original <- read.csv(googFile)
 if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
 if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
+if(!file.exists(tbondsFile)){tryCatch(tbondsFile)}
+if(file.exists(tbondsFile)) tbondsFile_original <- read.csv(tbondsFile)
 head(goog_original)
 head(nasdaqFile_original)
 # generate an id column for future use (joins etc)
@@ -54,8 +57,13 @@ head(nasdaqs)
 summary(nasdaqs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
+tbondsTable <- read.table(tbondsFile, header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 googTable <- merge(googTable,nasdaqTable, by="Date")
 googTable[,c("Date")]<- as.character.Date(googTable[,c("Date")])
 googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
 names(googTable)[2:3] <- c("goog.prices","nasdaq.prices")
-head(googTable)
+googTable[-nrow(googTable),-1] <- googTable[-nrow(googTable),-1]/googTable[-1,-1]-1
+names(googTable)[2:3] <- c("goog.outcomes","nasdaq.outcomes")
+names(tbondsTable)[2] < - "tbonds.outcomes"
+
+
