@@ -58,12 +58,16 @@ summary(nasdaqs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 tbondsTable <- read.table(tbondsFile, header = TRUE, sep = ",")[,c("Date","Adj.Close")]
+names(tbondsTable)[2] <- "tbonds.outcomes"
 googTable <- merge(googTable,nasdaqTable, by="Date")
 googTable[,c("Date")]<- as.character.Date(googTable[,c("Date")])
 googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
 names(googTable)[2:3] <- c("goog.prices","nasdaq.prices")
 googTable[-nrow(googTable),-1] <- googTable[-nrow(googTable),-1]/googTable[-1,-1]-1
 names(googTable)[2:3] <- c("goog.outcomes","nasdaq.outcomes")
-names(tbondsTable)[2] < - "tbonds.outcomes"
+tbondsTable[,c("Date")]<-as.Date(tbondsTable[,c("Date")])
+googTable<-merge(googTable,tbondsTable,by="Date")
+googTable$tbonds.outcomes<-googTable$tbonds.outcomes/100
+googTable[,c("goog.outcomes","nasdaq.outcomes")] <- googTable[,c("goog.outcomes","nasdaq.outcomes")]-googTable[,"tbonds.outcomes"]
 
 
