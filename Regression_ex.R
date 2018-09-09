@@ -76,3 +76,4 @@ plot(googTable$goog.outcomes,googTable$nasdaq.outcomes)
 googTableM<-lm(googTable$goog.outcomes~googTable$nasdaq.outcomes)
 summary(googTableM)
 plot(googTableM)
+
