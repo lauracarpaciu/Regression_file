@@ -35,8 +35,37 @@ googs <- goog_original%>%
 # the date field is formatted as a string - transform that into R date
 googs$Date<-as.POSIXct(strptime(googs$Date,"%Y-%m-%d",tz="UTC"))
 
+# generate an id column for future use (joins etc)
+googs$goog_id = seq.int(nrow(googs))
 
+head(googs)
+summary(googs)
 
+# how many volumes have been realized over the years?
+googs %>% 
+  ggplot(mapping = aes(year(Date))) +
+  geom_bar(aes(fill= Volume), width=1, color="black") +
+  theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
+
+# what values is our dataset missing?
+
+ggplot_missing <- function(x){
+  
+  x %>%
+    is.na %>%
+    melt %>%
+    ggplot(mapping = aes(x = Var2,
+                         y = Var1)) +
+    geom_raster(aes(fill = value)) +
+    scale_fill_grey(name = "",
+                    labels = c("Present","Missing")) +
+    theme(axis.text.x  = element_text(angle=45, vjust=0.5)) +
+    labs(x = "Variables in Dataset",
+         y = "Rows / observations")
+}
+
+ggplot_missing(googs)
+    
 
 if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
 if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
@@ -44,8 +73,6 @@ if(!file.exists(tbondsFile)){tryCatch(tbondsFile)}
 if(file.exists(tbondsFile)) tbondsFile_original <- read.csv(tbondsFile)
 head(goog_original)
 head(nasdaqFile_original)
-# generate an id column for future use (joins etc)
-goog_original$goog_id = seq.int(nrow(goog_original))
 nasdaqFile_original$nasdaq_id = seq.int(nrow(nasdaqFile_original))
 head(goog_original)
 summary(goog_original)
