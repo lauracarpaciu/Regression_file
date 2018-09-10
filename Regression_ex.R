@@ -17,12 +17,27 @@ pacman::p_load(
 
 # set options for plots
 options(repr.plot.width=6, repr.plot.height=6)
-# Load the googs data
+# Load the data
 googFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\goog.csv"
 nasdaqFile<-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\Nasdaq.csv"
 tbondsFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\tbond5yr.csv"
 if(!file.exists(googFile)){tryCatch(googFile)}
+
 if(file.exists(googFile)) goog_original <- read.csv(googFile)
+
+head(goog_original)
+
+# eliminate any duplicates that may exist in the dataset
+
+googs <- goog_original%>%
+  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
+
+# the date field is formatted as a string - transform that into R date
+googs$Date<-as.POSIXct(strptime(googs$Date,"%Y-%m-%d",tz="UTC"))
+
+
+
+
 if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
 if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
 if(!file.exists(tbondsFile)){tryCatch(tbondsFile)}
@@ -46,8 +61,7 @@ nasdaqFile_original %>%
   geom_bar(aes(fill= Volume), width=1, color="black") +
   theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
 # eliminate any duplicates that may exist in the dataset
-googs <- goog_original%>%
-  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
+
 nasdaqs <- nasdaqFile_original%>%
   distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
 # the date field is formatted as a string - transform that into R date
