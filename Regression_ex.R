@@ -71,17 +71,23 @@ ggplot_missing(googs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 tbondsTable <- read.table(tbondsFile, header = TRUE, sep = ",")[,c("Date","Adj.Close")]
+
 names(tbondsTable)[2] <- "tbonds.returns"
 tbondsTable[,c("Date")]<- as.Date(tbondsTable[,c("Date")])
+
 googTable <- merge(googTable,nasdaqTable, by="Date")
 googTable[,c("Date")]<- as.Date(googTable[,c("Date")])
 googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
 names(googTable)[2:3] <- c("goog.prices","nasdaq.prices")
+
 googTable[-nrow(googTable),-1] <- googTable[-nrow(googTable),-1]/googTable[-1,-1]-1
 googTable<-googTable[-nrow(googTable),]
+
 names(googTable)[2:3] <- c("goog.returns","nasdaq.returns")
+
 googTable<-merge(googTable,tbondsTable,by="Date")
 googTable$tbonds.returns<-googTable$tbonds.returns/100
+
 googTable[,c("goog.returns","nasdaq.returns")] <- googTable[,c("goog.returns","nasdaq.returns")]-googTable[,"tbonds.returns"]
 
 #Build a linear model that accounts for missing values
