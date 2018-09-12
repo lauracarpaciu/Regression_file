@@ -33,7 +33,7 @@ googs <- goog_original%>%
   distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
 
 # the date field is formatted as a string - transform that into R date
-googs$Date<-as.POSIXct(strptime(googs$Date,"%Y-%m-%d",tz="UTC"))
+googs$Date<-as.POSIXct(strptime(googs$Date,"%d/%m/%Y",tz="UTC"))
 
 # generate an id column for future use (joins etc)
 googs$goog_id = seq.int(nrow(googs))
@@ -66,43 +66,15 @@ ggplot_missing <- function(x){
 
 ggplot_missing(googs)
     
+# Preprocessing the data
 
-if(!file.exists(nasdaqFile)){tryCatch(nasdaqFile)}
-if(file.exists(nasdaqFile)) nasdaqFile_original <- read.csv(nasdaqFile)
-if(!file.exists(tbondsFile)){tryCatch(tbondsFile)}
-if(file.exists(tbondsFile)) tbondsFile_original <- read.csv(tbondsFile)
-head(goog_original)
-head(nasdaqFile_original)
-nasdaqFile_original$nasdaq_id = seq.int(nrow(nasdaqFile_original))
-head(goog_original)
-summary(goog_original)
-head(nasdaqFile_original)
-summary(nasdaqFile_original)
-# how many volumes have been realized over the years?
-goog_original %>% 
-  ggplot(mapping = aes(year(Date))) +
-  geom_bar(aes(fill= Volume), width=1, color="black") +
-  theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
-nasdaqFile_original %>% 
-  ggplot(mapping = aes(year(Date))) +
-  geom_bar(aes(fill= Volume), width=1, color="black") +
-  theme(legend.position = "bottom", legend.direction = "vertical") + ggtitle("Volumes by Year")
-# eliminate any duplicates that may exist in the dataset
-
-nasdaqs <- nasdaqFile_original%>%
-  distinct(.keep_all = TRUE,Date,Volume,Adj.Close)
-# the date field is formatted as a string - transform that into R date
-head(googs)
-summary(googs)
-head(nasdaqs)
-summary(nasdaqs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 tbondsTable <- read.table(tbondsFile, header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 names(tbondsTable)[2] <- "tbonds.outcomes"
-tbondsTable[,c("Date")]<- as.character.Date(tbondsTable[,c("Date")])
+tbondsTable[,c("Date")]<- as.Date(tbondsTable[,c("Date")])
 googTable <- merge(googTable,nasdaqTable, by="Date")
-googTable[,c("Date")]<- as.character.Date(googTable[,c("Date")])
+googTable[,c("Date")]<- as.Date(googTable[,c("Date")])
 googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
 names(googTable)[2:3] <- c("goog.prices","nasdaq.prices")
 googTable[-nrow(googTable),-1] <- googTable[-nrow(googTable),-1]/googTable[-1,-1]-1
@@ -111,10 +83,30 @@ names(googTable)[2:3] <- c("goog.outcomes","nasdaq.outcomes")
 googTable<-merge(googTable,tbondsTable,by="Date")
 googTable$tbonds.outcomes<-googTable$tbonds.outcomes/100
 googTable[,c("goog.outcomes","nasdaq.outcomes")] <- googTable[,c("goog.outcomes","nasdaq.outcomes")]-googTable[,"tbonds.outcomes"]
+
+#Build a linear model that accounts for missing values
+
+googM<- lm(googTable$goog.outcomes~googTable$nasdaq.outcomes, na.action = na.omit)
+
+# Deal with missing values in the preprocessing step itself
+
+googTable[,"goog.outcomes"][is.na(googTable[,"goog.outcomes"])]<-mean(googTable[,"goog.outcomes"])
+
+#Including a categorical variable
+
+googTable$Month = format(googTable$Date,"%m")
+dummyVars <- model.matrix(~Month,googTable)
+goog_MLR <- lm(googTable$goog.outcomes~googTable$nasdaq.outcomes+googTable$Month)
+summary(goog_MLR)
+
 #Robust linear regression 
+
 plot(googTable$goog.outcomes,googTable$nasdaq.outcomes)
-# Building a linear model
-googTableM<-lm(googTable$goog.outcomes~googTable$nasdaq.outcomes)
-summary(googTableM)
-plot(googTableM)
+abline(googM)
+require(MASS)
+googRLM<- rlm(googTable$goog.outcomes~googTable$nasdaq.outcomes)
+abline(googRLM,lty ="twodash")
+
+#Diagnostic plots 
+plot(googM) 
 
