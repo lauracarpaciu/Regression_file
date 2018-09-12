@@ -71,7 +71,7 @@ ggplot_missing(googs)
 googTable <-read.table(googFile,header = TRUE, sep ="," )[,c("Date","Adj.Close")]
 nasdaqTable <- read.table(nasdaqFile,header = TRUE, sep = ",")[,c("Date","Adj.Close")]
 tbondsTable <- read.table(tbondsFile, header = TRUE, sep = ",")[,c("Date","Adj.Close")]
-names(tbondsTable)[2] <- "tbonds.outcomes"
+names(tbondsTable)[2] <- "tbonds.returns"
 tbondsTable[,c("Date")]<- as.Date(tbondsTable[,c("Date")])
 googTable <- merge(googTable,nasdaqTable, by="Date")
 googTable[,c("Date")]<- as.Date(googTable[,c("Date")])
@@ -79,33 +79,33 @@ googTable <- googTable[order(googTable$Date,decreasing = TRUE),]
 names(googTable)[2:3] <- c("goog.prices","nasdaq.prices")
 googTable[-nrow(googTable),-1] <- googTable[-nrow(googTable),-1]/googTable[-1,-1]-1
 googTable<-googTable[-nrow(googTable),]
-names(googTable)[2:3] <- c("goog.outcomes","nasdaq.outcomes")
+names(googTable)[2:3] <- c("goog.returns","nasdaq.returns")
 googTable<-merge(googTable,tbondsTable,by="Date")
-googTable$tbonds.outcomes<-googTable$tbonds.outcomes/100
-googTable[,c("goog.outcomes","nasdaq.outcomes")] <- googTable[,c("goog.outcomes","nasdaq.outcomes")]-googTable[,"tbonds.outcomes"]
+googTable$tbonds.returns<-googTable$tbonds.returns/100
+googTable[,c("goog.returns","nasdaq.returns")] <- googTable[,c("goog.returns","nasdaq.returns")]-googTable[,"tbonds.returns"]
 
 #Build a linear model that accounts for missing values
 
-googM<- lm(googTable$goog.outcomes~googTable$nasdaq.outcomes, na.action = na.omit)
+googM<- lm(googTable$goog.returns~googTable$nasdaq.returns, na.action = na.omit)
 
 # Deal with missing values in the preprocessing step itself
 
-googTable[,"goog.outcomes"][is.na(googTable[,"goog.outcomes"])]<-mean(googTable[,"goog.outcomes"])
+googTable[,"goog.returns"][is.na(googTable[,"goog.returns"])]<-mean(googTable[,"goog.returns"])
 
 #Including a categorical variable
 
 googTable$Month = format(googTable$Date,"%m")
 dummyVars <- model.matrix(~Month,googTable)
-goog_MLR <- lm(googTable$goog.outcomes~googTable$nasdaq.outcomes+googTable$Month)
+goog_MLR <- lm(googTable$goog.returns~googTable$nasdaq.returns+googTable$Month)
 summary(goog_MLR)
 
 #Robust linear regression 
 
-plot(googTable$goog.outcomes,googTable$nasdaq.outcomes)
+plot(googTable$goog.returns,googTable$nasdaq.returns)
 abline(googM)
 require(MASS)
-googRLM<- rlm(googTable$goog.outcomes~googTable$nasdaq.outcomes)
-abline(googRLM,lty ="twodash")
+googRLM<- rlm(googTable$goog.returns~googTable$nasdaq.returns)
+abline(googRLM,lty ="dotdash")
 
 #Diagnostic plots 
 plot(googM) 
