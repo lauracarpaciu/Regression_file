@@ -20,7 +20,7 @@ options(repr.plot.width=6, repr.plot.height=6)
 # Load the data
 googFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\goog.csv"
 nasdaqFile<-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\Nasdaq.csv"
-tbondsFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\tbond5yr.csv"
+tbondsFile <-"C:\\Users\\Mirela\\RStudioProjects\\Regression_file\\Regression_Data\\tbond8yr.csv"
 if(!file.exists(googFile)){tryCatch(googFile)}
 
 if(file.exists(googFile)) goog_original <- read.csv(googFile)
